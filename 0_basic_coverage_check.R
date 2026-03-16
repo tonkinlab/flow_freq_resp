@@ -8,19 +8,19 @@ theme_set(theme_bw())
 theme_update(text = element_text(size = 8),
              panel.grid = element_blank())
 
-
+# Load data
 data = readRDS("Data/Data_models.RDS")
 Y = data$Ymod
 coord <- read.csv("./Data/SitesMetadata/NRWQNSitesMetadata.csv") %>% rename(Site = LocID)
 site_pairs <- read.csv2("./Data/SitesMetadata/site_pairs.csv") %>% pivot_longer(-Pair, values_to = 'Site', names_to = 'Impacted')
 
 
-#### N sites, samples, species ####
+#### Check N sites, samples, species ####
 length(unique(data$Spt$Site)) # N sites
 nrow(data$Ymod) # N samples
 length(names(data$Ymod[,-c(1,2)])) # N species
 
-#### Site characteristics ####
+#### Check site characteristics ####
 range(coord$Latitude) # Range of latitudes
 range(data$EnvData$Order) # Range of river orders
 range(coord$SiteElev) # Range of site elevations
