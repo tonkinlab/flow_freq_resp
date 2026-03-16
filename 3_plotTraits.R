@@ -129,7 +129,7 @@ levels(out_trait_data$trait_category) <- c('adult and larva', 'adult or larva', 
 out_trait_data$trait_category <- paste0(out_trait_data$trait_category, ifelse(out_trait_data$baseline, '*', ''))
 out_trait_data$trait <- as.factor(out_trait_data$trait)
 
-levels(out_trait_data$trait) <- c('aquatic\n stage', 'cycles\n per year', 'disseminaion\n potential', 'size', 'mobility')
+levels(out_trait_data$trait) <- c('aquatic\n stage', 'cycles\n per year', 'dissemination\n potential', 'size', 'mobility')
 out_trait_data$env_var <- as.factor(out_trait_data$env_var)
 levels(out_trait_data$env_var) <- c('TNER', 'mean', 'fast', 'seasonal', 'slow')
 

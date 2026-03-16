@@ -22,9 +22,7 @@ source('Data/taxa_groups.R')
 # load functions
 source('Functions/predict_gllvm.R')
 
-
 # Create new data
-
 Variables = c("Mean", "Trend2", "Residual", "Seasonal", "l_SUD_N")
 newdata <- list()
 n_gradient = 50 # number of equaly spaced points within each gradient (variable)
@@ -69,14 +67,11 @@ for (v in unique(sim_data$var)) {
   for (s in unique(sim_data$site)) {
     print(s)
     kk <- subset(sim_data, site == s & var == v)
-    
-    # Pre-allocate vectors for adjacent steps only
     n_steps <- nrow(kk) - 1
     beta_bray <- numeric(n_steps)
     beta_grad <- numeric(n_steps)
     beta_bal <- numeric(n_steps)
-    
-    # Only loop through adjacent pairs (i and i+1)
+    # Only loop through adjacent pairs (i and i + 1) (i.e., 'instnat' rate of change)
     for (i in 1:n_steps) {
       j <- i + 1
       kk_beta <- betapart::beta.pair.abund(log1p(kk[c(i,j), -c(1:9)]))
@@ -89,7 +84,7 @@ for (v in unique(sim_data$var)) {
     out_kk <-  data.frame(var = v, 
                           site = s,
                           val_i = kk$val[1:n_steps],
-                          val_j = kk$val[2:(n_steps+1)],
+                          val_j = kk$val[2:(n_steps + 1)],
                           beta_bray = beta_bray,
                           beta_grad = beta_grad,
                           beta_bal = beta_bal)
