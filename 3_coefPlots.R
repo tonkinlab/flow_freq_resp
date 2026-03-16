@@ -31,7 +31,6 @@ coef_data <- data.frame(mAb$sd[['Xcoef']]) %>%
 coef_data %>% group_by(var) %>% summarise(mean_coef = mean(abs(coef)), 
                                           mean_coef_sd = sd(abs(coef)))
 
-# Flow 
 group_colours =   c('purple4','steelblue', 'darkolivegreen4', 'khaki3', 'gold2','darkorange', 'coral2', 'brown','grey20','grey20','grey20')
 
 coef_data %>% 
@@ -44,7 +43,6 @@ coef_data %>%
                         seasonal = "atop(bold('Seasonal'), 'MAE: 0.83')")
   ) %>%
   ggplot(aes(x = coef, y = sp)) +
-  # Keep label_parsed to interpret the atop() and bold() commands
   facet_grid(group ~ var2_label, scales = 'free', space = 'free_y', labeller = label_parsed) + 
   theme(
     legend.position = 'bottom',
@@ -55,7 +53,6 @@ coef_data %>%
     panel.grid.major.y = element_line(colour = 'grey95', linewidth = 0.2),
     panel.spacing = unit(0.5, "lines"),
     strip.background = element_blank(),
-    # element_text is safe for the S7 system!
     strip.text.x = element_text(colour = 'grey20', size = 10, face = "plain", lineheight = 1.1),
     strip.text.y = element_text(angle = 0, face = "plain", size = 8, hjust = 0),
     panel.border = element_rect(colour = NA, fill = NA),
