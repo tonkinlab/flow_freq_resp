@@ -6,9 +6,9 @@ library(mar1s)
 library(readr)
 library(sf)
 
-# convolution kernel sizes (95% of density)
-slow_kernel_size = 365*2 # range of 95% density of half-haussian kernel
-fast_kernel_size = 90 # range of 95% density of half-haussian kernel
+# convolution kernel sizes (in days, approx. 95% of density)
+slow_kernel_size = 365*2 
+fast_kernel_size = 90 
 
 # function for convolution
 half_gaussian_kernel <- function(sigma, size) {
@@ -56,10 +56,6 @@ tslist_input_14 <- lapply(tslist, function(x){
              Flow_input = unclass(x_imput)[-c(1:(slow_kernel_size + fast_kernel_size))])
 })
 
-
 # converting to df 
 imputed_flow_14 <- data.frame(do.call(rbind,tslist_input_14))
 write.csv(imputed_flow_14, 'Data/Flow/FlowData_2022_decomp.csv', row.names = FALSE)
-
-
-
