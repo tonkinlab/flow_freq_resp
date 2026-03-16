@@ -38,7 +38,7 @@ XData$Site <- as.factor(XData$Site)
 TrData = read.csv("Data/traits.csv")
 rownames <- TrData$taxa_match
 
-# Drop species not in abundance data  and select Life history + mobility traits
+# Drop species not in abundance data and select Life history + mobility traits
 colnames(TrData)
 TrData <- TrData[, c(2,10:21, 39:41, 42:45, 66:68)]
 
@@ -68,7 +68,7 @@ TrData$CycPerYear_SEMI2 <- TrData$CycPerYear_SEMI / (TrData$CycPerYear_UNIV + Tr
 TrData$CycPerYear_PLURIV2 <- TrData$CycPerYear_PLURIV / (TrData$CycPerYear_UNIV + TrData$CycPerYear_SEMI + TrData$CycPerYear_PLURIV)
 TrData$CycPerYear_UNIV2 <- NULL
 
-# create a new category for size (values based on Macro-invertebrate trait database)
+# create a new variable for size (values based on Macro-invertebrate trait database)
 TrData$SIZE <- (TrData$Size_1 * 2.5 + TrData$Size_2 * 7.5 + TrData$Size_3 * 15 + TrData$Size_4 * 30 + TrData$Size_5 * 50) / (TrData$Size_1 + TrData$Size_2 + TrData$Size_3 + TrData$Size_4 + TrData$Size_5)
 TrData$l_SIZE <- log(TrData$SIZE)
 TrData <- dplyr::select(TrData, l_SIZE, aq_ADUANDLAR2, aq_ADUORLAR2, DissPotential_LOW2, DissPotential_HIGH2, Mob_BURROWER2,Mob_SWIMMER2,Mob_ATTACHED2,CycPerYear_SEMI2, CycPerYear_PLURIV2)
@@ -84,10 +84,10 @@ StudyDesign <- data.frame(
   Site = (as.factor(data$Spt$Site)),
   Year_site = as.factor(paste0(data$Spt$Date,data$Spt$Site)))
 
-#Create model matrix
+# Create model matrix
 mod.mat <- data.frame(model.matrix(~ meanFlow + Trend2 + Residual + Seasonal + l_SUD_N, data = XData)[,-1])
 names(mod.mat) <- c('Mean' , 'Trend2', 'Residual','Seasonal', 'l_SUD_N')
-mod.mat <- data.frame(scale(mod.mat,scale = FALSE)) # Maintain units so coefficients can be compared
+mod.mat <- data.frame(scale(mod.mat,scale = FALSE)) # center but keep scale so coefficients can be compared
 mod.mat$int <- 1 # Add intercept to taxa-specific random effects
 
 TrData <- na.omit(TrData)
@@ -95,6 +95,7 @@ y <- Y[, rownames(TrData)]
 y <- y[, order(colSums(y > 0), decreasing = T)]
 TR <- TrData[names(y),]
 
+# Save for use in other scripts
 saveRDS(TrData, 'Data/TrData_model.rds')
 saveRDS(mod.mat, 'Data/model_matrix_env.rds')
 saveRDS(StudyDesign, 'Data/model_study_design.rds')
