@@ -6,8 +6,9 @@
 .httr-oauth
 .DS_Store
 .quarto
-Data/
-Models/
 .rds
 .RDS
 .pdf
+Data/
+Models/
+
