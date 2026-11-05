@@ -18,18 +18,39 @@ trait_effects <- function(mod,
   # Default trait_type if not specified
   trait_type <- match.arg(trait_type)
   
-  # extract point estimates
-  mu <- c(beta0 = unique(mod$params$beta0),
-          mod$params$B)
+  # extract point estimates (fixed effects only: main effects and trait interactions)
+  mu <- mod$params$B
   
-  # variance covariance
+  # variance covariance of those same parameters
   Sigma <- vcov(mod)
   Sigma <- (Sigma + t(Sigma)) / 2
-  Sigma <- Sigma[str_detect(rownames(Sigma), "^b$|^B"), 
-                 str_detect(colnames(Sigma), "^b$|^B")]
+  idx <- which(rownames(Sigma) == "B")          # run table(rownames(vcov(mod))) once to confirm the labels
+  # safety check: the selected block must be the B coefficients, in the same order as mod$params$B
+  stopifnot(length(idx) == length(mu),
+            isTRUE(all.equal(unname(sqrt(diag(Sigma)[idx])), unname(mod$sd$B), tolerance = 1e-3)))
+  Sigma <- Sigma[idx, idx]
   
   # simulate parameter "posterior"
   param_draws <- rmvnorm(nsim, mu, Sigma)
+  
+  # interaction coefficients of env_name, one column per trait, in the column order of `traits`
+  # 1) by name ("env:trait" or "trait:env"); 2) if the names don't match, the original behaviour:
+  # every column containing "env:", taken in the order the model stores them (with a warning)
+  get_BI <- function(env_name) {
+    cand <- cbind(paste0(env_name, ":", colnames(traits)),
+                  paste0(colnames(traits), ":", env_name))
+    pick <- apply(cand, 1, function(x) x[x %in% colnames(param_draws)][1])
+    if (!anyNA(pick)) return(param_draws[, pick, drop = FALSE])
+    
+    cols <- colnames(param_draws)[grepl(paste0(env_name, ":"), colnames(param_draws))]
+    if (length(cols) == ncol(traits)) {
+      warning("interaction names for ", env_name, " do not match the trait names; using the model's own order: ",
+              paste(cols, collapse = ", "), call. = FALSE)
+      return(param_draws[, cols, drop = FALSE])
+    }
+    stop("interaction coefficients not found for ", env_name, ". Names in the model: ",
+         paste(colnames(param_draws), collapse = ", "))
+  }
   
   # Mean / SD trait data
   traits_mean <- colMeans(traits)
@@ -59,7 +80,7 @@ trait_effects <- function(mod,
       # main effect
       B_e <- param_draws[, env_name]
       # Fourth corner coef
-      B_I <- param_draws[,grepl(paste0(env_name, ':'), colnames(param_draws))] 
+      B_I <- get_BI(env_name) 
       
       # Set all trait categories for ttrait to 0
       t_j_base <- traits_mean
@@ -107,7 +128,7 @@ trait_effects <- function(mod,
       # main effect
       B_e <- param_draws[, env_name]
       # Fourth corner coef
-      B_I <- param_draws[,grepl(paste0(env_name, ':'), colnames(param_draws))] 
+      B_I <- get_BI(env_name) 
       
       # Set all trait categories for trait to 0
       t_j_base <- traits_mean
@@ -175,8 +196,8 @@ trait_effects <- function(mod,
     # Get the main effect 
     B_e <- param_draws[, env_name]
     # Fourth corner coef
-    B_I <- param_draws[,grepl(paste0(env_name, ':'), colnames(param_draws))] 
-
+    B_I <- get_BI(env_name) 
+    
     # Set all trait to mean
     t_j_base <- traits_mean
     
@@ -239,4 +260,3 @@ trait_effects <- function(mod,
     return(results)
   }
 }
-
